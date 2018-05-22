@@ -46,6 +46,12 @@ for r in arrow.Arrow.range('hour',start, end):
     df20 = pd.DataFrame(columns=['CALL','GRID','FREQ','LAT','LON'])
     df15 = pd.DataFrame(columns=['CALL','GRID','FREQ','LAT','LON'])
     df10 = pd.DataFrame(columns=['CALL','GRID','FREQ','LAT','LON'])
+
+    data15 = []
+    data20 = []
+    data40 = []
+    scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
+    [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
     for index,row in hourly_map.iterrows():
 
         h = HamLocation()
@@ -58,50 +64,89 @@ for r in arrow.Arrow.range('hour',start, end):
             color = '#000080'
             entry = pd.DataFrame([[row['REPORTER'],row['REPGRID'],row['FREQ'],lat,lon]],columns=['CALL','GRID','FREQ','LAT','LON'])
             df40 = pd.concat([df40,entry], ignore_index=True)
+            data40 = [ dict(
+                type = 'scattergeo',
+                locationmode = 'USA-states',
+                lon = df40['LON'],
+                lat = df40['LAT'],
+                text = df40['CALL'] +" "+ df40['GRID'],
+                mode = 'markers',
+                marker = dict(
+                size = 8,
+                color = 'rgba(60,126,183)',
+                opacity = 0.8,
+                reversescale = True,
+                autocolorscale = False,
+                symbol = 'square',
+                line = dict(
+                    width=1,
+                    color='rgba(102, 102, 102)'
+                ),
+                colorscale = scl,
+                cmin = 0,
+                ))]
         elif band == 14:
             color = '#FFFF00'
+            entry = pd.DataFrame([[row['REPORTER'],row['REPGRID'],row['FREQ'],lat,lon]],columns=['CALL','GRID','FREQ','LAT','LON'])
+            df20 = pd.concat([df20,entry], ignore_index=True)
+            data20 = [ dict(
+                type = 'scattergeo',
+                locationmode = 'USA-states',
+                lon = df20['LON'],
+                lat = df20['LAT'],
+                text = df20['CALL'] +" "+ df20['GRID'],
+                mode = 'markers',
+                marker = dict(
+                size = 8,
+                color = 'rgba(255,255,0)',
+                opacity = 0.8,
+                reversescale = True,
+                autocolorscale = False,
+                symbol = 'square',
+                line = dict(
+                    width=1,
+                    color='rgba(102, 102, 102)'
+                ),
+                colorscale = scl,
+                cmin = 0,
+                ))]
         elif band == 21:
             color = '#CD853F'
+            entry = pd.DataFrame([[row['REPORTER'],row['REPGRID'],row['FREQ'],lat,lon]],columns=['CALL','GRID','FREQ','LAT','LON'])
+            df15 = pd.concat([df15,entry], ignore_index=True)
+            data15 = [ dict(
+                type = 'scattergeo',
+                locationmode = 'USA-states',
+                lon = df15['LON'],
+                lat = df15['LAT'],
+                text = df15['CALL'] +" "+ df15['GRID'],
+                mode = 'markers',
+                marker = dict(
+                size = 8,
+                color = 'rgba(205,133,63)',
+                opacity = 0.8,
+                reversescale = True,
+                autocolorscale = False,
+                symbol = 'square',
+                line = dict(
+                    width=1,
+                    color='rgba(102, 102, 102)'
+                ),
+                colorscale = scl,
+                cmin = 0,
+                ))]
         elif band == 28:
             color = '#FA8072'
         print(row['REPORTER'], row['REPGRID'], band, color, lat, lon) 
 
     # now we need to build maps for each band/hr
-    scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
-    [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
-
-    data = [ dict(
-		type = 'scattergeo',
-		locationmode = 'USA-states',
-		lon = df40['LON'],
-		lat = df40['LAT'],
-		text = df40['CALL'],
-		mode = 'markers',
-		marker = dict(
-		size = 8,
-		opacity = 0.8,
-		reversescale = True,
-		autocolorscale = False,
-		symbol = 'square',
-		line = dict(
-			width=1,
-			color='rgba(102, 102, 102)'
-		),
-		colorscale = scl,
-		cmin = 0,
-		#color = df['cnt'],
-		#cmax = df['cnt'].max(),
-		#colorbar=dict(
-		#	title="Incoming flightsFebruary 2011"
-		#)
-		))]
 
     layout = dict(
-		title = 'WSPR Data Mapping',
+		title = 'WSPR Data Mapping - '+str(r),
 		colorbar = True,
 		geo = dict(
-		scope='usa',
-		projection=dict( type='albers usa' ),
+		scope='north america',
+		projection=dict( type='azimuthal equal area' ),
 		showland = True,
 		landcolor = "rgb(250, 250, 250)",
 		subunitcolor = "rgb(217, 217, 217)",
@@ -113,7 +158,7 @@ for r in arrow.Arrow.range('hour',start, end):
 	
     fname = "map"+str(i) + ".html"
     print(fname)
-    fig = dict( data=data, layout=layout )
+    fig = dict( data=data40+data20+data15, layout=layout )
     py.plot( fig, validate=False, filename=fname ) 
     print("#######################################################################")
     i += 1
